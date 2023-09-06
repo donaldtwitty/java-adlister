@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySQLAdsDao implements Ads {
+public class MySQLAdsDao<Config> implements Ads {
     private Connection connection = null;
 
     public MySQLAdsDao(Config config) {
@@ -72,6 +72,27 @@ public class MySQLAdsDao implements Ads {
         while (rs.next()) {
             ads.add(extractAd(rs));
         }
+        return ads;
+    }
+
+    public List<Ad> getAds(int userId) throws SQLException {
+        Connection connection = DaoFactory.getConnection();
+
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM ads WHERE user_id = ?");
+        statement.setInt(1, userId);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        List<Ad> ads = new ArrayList<>();
+        while (resultSet.next()) {
+            Ad ad = new Ad();
+            ad.setId(resultSet.getInt("id"));
+            ad.setTitle(resultSet.getString("title"));
+            ad.setDescription(resultSet.getString("description"));
+            ad.setPrice(resultSet.getInt("price"));
+            ads.add(ad);
+        }
+
         return ads;
     }
 }
